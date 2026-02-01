@@ -48,7 +48,7 @@ class TemplateWatcher(FileSystemEventHandler):
 
 
 if __name__ == "__main__":
-    watch_dir = r"C:\dev"
+    watch_dir = r"C:/Users/Gabi/devApps/"
 
     appdata = Path(os.getenv("APPDATA"))
     tpl_dir = appdata / "CSS-HTML-Writer-Daemon" / "templates"
