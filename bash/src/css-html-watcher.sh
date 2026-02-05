@@ -10,45 +10,33 @@ processFile() {
 checkService() {
   local file=$1
   # Parte del código que consigue el nombre del fichero
+  if [[ "$(basename "$file")" != *.tpl ]]; then
+    echo "ERROR: tried to check a non .tpl file"
+    exit 3
+  fi
+  local fileName=$(basename "$file" .tpl)
   if [[ -e "$file" && -s "$file" ]] ; then
-  # Parte el código que activa o desactiva el servicio y da mensajes de error correctos
+    # echo ""$fileName" Writer Service is online"
+    echo 1
+  else
+    # echo ""$fileName" Writer Service is offline"
+    if [ ! -e "$file" ]; then
+      # echo "ERROR: "$file" does not exist"
+      echo 0
+    else
+      # echo "ERROR: "$file" is empty"
+      echo 0
+    fi
+  fi
 }
 WATCH_DIR="/home/gabs/Documents/devApps/"
 TPL_DIR="$HOME/.config/CSS-HTML-Writer-Daemon/templates"
 # "$HOME/.config/CSS-HTML-Writer-Daemon/templates/css.tpl" -> "css"
 CSS_TPL="$TPL_DIR/css.tpl"
 HTML_TPL="$TPL_DIR/html.tpl"
-SERVICE_CSS=0
-SERVICE_HTML=0
-VAR="css"
 declare -A validation
-validation[css]=0
-validation[html]=0
-echo ${validation["$VAR"]}
-exit 0
-if [[  -e "$CSS_TPL" && -s "$CSS_TPL" ]] ; then
-	SERVICE_CSS=1
-	echo "CSS Writer Service is online"
-else
-	echo "CSS Writer Service is offline"
-	if [ ! -e "$CSS_TPL" ]; then
-		echo "ERROR: css.tpl does not exist"
-	else
-		echo "ERROR: css.tpl is empty"
-	fi
-fi
-
-if [[  -e "$HTML_TPL" && -s "$HTML_TPL" ]] ; then
-	SERVICE_HTML=1
-	echo "HTML Writer Service is online"
-else
-	echo "HTML Writer Service is offline"
-	if [ ! -e "$HTML_TPL" ]; then
-		echo "ERROR: html.tpl does not exist"
-	else
-		echo "ERROR: html.tpl is empty"
-	fi
-fi
+validation[css]=$(checkService "$CSS_TPL")
+validation[html]=$(checkService "$HTML_TPL")
 
 if [ -d "$WATCH_DIR" ]; then
 	if [ -d "$TPL_DIR/" ]; then
@@ -56,14 +44,14 @@ if [ -d "$WATCH_DIR" ]; then
 		do
 			case "$FILE" in
 				*.css)
-					if [[ ! -s "$FILE"  && $SERVICE_CSS -eq 1 ]] ; then
+					if [[ ! -s "$FILE"  && ${validation[css]} -eq 1 ]] ; then
 						processFile "$FILE" "$CSS_TPL"
 					fi
 					;;
 			esac
 			case "$FILE" in
 				*.html)
-					if [[  ! -s "$FILE" && $SERVICE_HTML -eq 1 ]] ; then
+					if [[  ! -s "$FILE" && ${validation[html]} -eq 1 ]] ; then
 						processFile "$FILE" "$HTML_TPL"
 					fi
 					;;
