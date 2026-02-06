@@ -7,6 +7,26 @@ processFile() {
 	cat "$template" > "$file"
 	echo "Updated $file"
 }
+# 1: servicio online
+# 2: servicio offline
+# 3: ERROR fichero no existe
+# 4: ERROR fichero está vacio
+imprimirEstado() {
+  case $1 in
+    1)
+      echo ""$2" Writer service is online" >&2
+      ;;
+    2)
+      echo ""$2" Writer Service is offline" >&2
+      ;;
+    3)
+      echo "ERROR: "$2" does not exist" >&2
+      ;;
+    4)
+      echo "ERROR: "$2" file is empty" >&2
+      ;;
+  esac
+}
 checkService() {
   local file=$1
   # Parte del código que consigue el nombre del fichero
@@ -16,15 +36,15 @@ checkService() {
   fi
   local fileName=$(basename "$file" .tpl)
   if [[ -e "$file" && -s "$file" ]] ; then
-    # echo ""$fileName" Writer Service is online"
+    imprimirEstado 1 "$fileName"
     echo 1
   else
-    # echo ""$fileName" Writer Service is offline"
+    imprimirEstado 2 "$fileName"
     if [ ! -e "$file" ]; then
-      # echo "ERROR: "$file" does not exist"
+      imprimirEstado 3 "$fileName"
       echo 0
     else
-      # echo "ERROR: "$file" is empty"
+      imprimirEstado 4 "$fileName"
       echo 0
     fi
   fi
