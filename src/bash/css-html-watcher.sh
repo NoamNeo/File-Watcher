@@ -1,6 +1,7 @@
-#!usr/bin/env bash
+#!/usr/bin/env bash
 
 # When calling this function you should make sure the file you want to be modified is the first argument
+# And the template the seccond
 processFile() {
   local file=$1
   local template=$2
@@ -11,7 +12,7 @@ processFile() {
 # 2: service offline
 # 3: ERROR file does not exist
 # 4: ERROR file is empty
-imprimirEstado() {
+logState() {
   case $1 in
   1)
     echo ""$2" Writer service is online" >&2
@@ -30,28 +31,33 @@ imprimirEstado() {
 checkService() {
   local file=$1
   # This piece of code gets the file name
-  if [[ "$(basename "$file")" != *.tpl ]]; then
-    echo "ERROR: tried to check a non .tpl file"
+  if [[ "$(basename "$file")" != *.tpl && "$(basename "$file")" != *.conf ]]; then
+    echo "ERROR: tried to check a non .tpl or .conf file"
     exit 3
   fi
   local fileName=$(basename "$file" .tpl)
   if [[ -e "$file" && -s "$file" ]]; then
-    imprimirEstado 1 "$fileName"
+    logState 1 "$fileName"
     echo 1
   else
-    imprimirEstado 2 "$fileName"
+    logState 2 "$fileName"
     if [ ! -e "$file" ]; then
-      imprimirEstado 3 "$fileName"
+      logState 3 "$fileName"
       echo 0
     else
-      imprimirEstado 4 "$fileName"
+      logState 4 "$fileName"
       echo 0
     fi
   fi
 }
-WATCH_DIR= # Add the directory you want to watch
 TPL_DIR="$HOME/.config/CSS-HTML-Writer-Daemon/templates"
-# "$HOME/.config/CSS-HTML-Writer-Daemon/templates/css.tpl" -> "css"
+WATCH_DIR_CONFIG="$HOME/.config/CSS-HTML-Writer-Daemon/watcher-path.conf"
+checkService "$WATCH_DIR_CONFIG"
+if [[ -e "$WATCH_DIR_CONFIG" && -s "$WATCH_DIR_CONFIG" ]]; then
+  WATCH_DIR="$(grep -v "^#" "$WATCH_DIR_CONFIG")"
+else
+  WATCH_DIR="$HOME/"
+fi
 CSS_TPL="$TPL_DIR/css.tpl"
 HTML_TPL="$TPL_DIR/html.tpl"
 declare -A validation
