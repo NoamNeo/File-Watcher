@@ -1,0 +1,15 @@
+[Unit]
+Description=CSS Auto Writer Daemon
+After=network.targe
+
+[Service]
+Type=simple
+# TODO: switch the ExecStart to a binary instead of running the source code directly
+ExecStart=/usr/local/bin/css-html-watcher.sh
+Restart=always
+RestartSec=3
+#TODO: Create the build script that pipes the user to the service
+User=
+
+[Install]
+WantedBy=multi-user.target
